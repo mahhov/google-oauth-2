@@ -1,0 +1,19 @@
+{
+  "name": "google-oauth2-x",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/GoogleAuth",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mahhov/googleOauth2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mahhov/googleOauth2/issues"
+  },
+  "homepage": "https://github.com/mahhov/googleOauth2#readme"
+}

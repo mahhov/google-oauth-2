@@ -1,4 +1,4 @@
-## Google OAuth 2
+## Google OAuth2 X
 
 ### Consent screen
 
@@ -7,7 +7,7 @@ Simply extend the `GoogleAuth` class and override the `openConsentScreen_()` met
 #### Consent screen for electron app
 
 ```js
-const GoogleAuth = require('google-oauth-2');
+const GoogleAuth = require('google-oauth2-x');
 const {shell} = require('electron');
 
 class ElectronGoogleAuth extends GoogleAuth {
