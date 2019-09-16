@@ -59,16 +59,15 @@ class GoogleAuth {
 		if (this.token_)
 			return this.token_;
 		if (this.tokens_)
-			this.tokens_ = await this.refreshToken_(this.tokens_.refresh_token);
-		else {
-			let code = await this.requestCode_();
-			this.tokens_ = await this.requestToken_(code);
-			fs.writeFile(this.tokensPath_, JSON.stringify(this.tokens_, null, 2),
-				err => {
-					if (err)
-						throw err;
-				});
-		}
+			return this.token_ = (await this.refreshToken_(this.tokens_.refresh_token)).access_token;
+
+		let code = await this.requestCode_();
+		this.tokens_ = await this.requestToken_(code);
+		fs.writeFile(this.tokensPath_, JSON.stringify(this.tokens_, null, 2),
+			err => {
+				if (err)
+					throw err;
+			});
 		return this.token_ = this.tokens_.access_token;
 	}
 
