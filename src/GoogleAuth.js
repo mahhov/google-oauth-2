@@ -7,18 +7,18 @@ class GoogleAuth {
 	/*
 		Certificate:
 		{
-		  "installed": {
-		    "client_id": "663996541334-4rdijihf9s0hub89lourvsbhg23khjsm.apps.googleusercontent.com",
-		    "project_id": "js-player-250603",
-		    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-		    "token_uri": "https://oauth2.googleapis.com/token",
-		    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-		    "client_secret": "zVBWziJYqByN87puEm5OOtpn",
-		    "redirect_uris": [
-		      "urn:ietf:wg:oauth:2.0:oob",
-		      "http://localhost"
-		    ]
-		  }
+			"installed": {
+				"client_id": "abc",
+				"project_id": "my-project-123",
+				"auth_uri": "https://accounts.google.com/o/oauth2/auth",
+				"token_uri": "https://oauth2.googleapis.com/token",
+				"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+				"client_secret": "xyz",
+				"redirect_uris": [
+					"urn:ietf:wg:oauth:2.0:oob",
+					"http://localhost"
+				]
+			}
 		}
 		Tokens response:
 		{
@@ -55,12 +55,44 @@ class GoogleAuth {
 		return `${this.credentials_.auth_uri}?client_id=${this.credentials_.client_id}&redirect_uri=${redirectUri}&response_type=code&scope=${this.scope_}`;
 	}
 
-	async getToken() {
+	getToken() {
 		if (this.token_)
-			return this.token_;
-		if (this.tokens_)
-			return this.token_ = (await this.refreshToken_(this.tokens_.refresh_token)).access_token;
+			;
+		else if (this.tokens_)
+			this.token_ = this.refreshToken_(this.tokens_.refresh_token);
+		else
+			this.token_ = this.cleanToken_();
+		this.token_.then(() => this.token_.resolved = true);
+		return this.token_;
+	}
 
+	getRefreshedToken(force = false) {
+		if (force || this.token_.resolved)
+			this.token_ = null;
+		return this.getToken();
+	}
+
+	getCleanToken(force = false) {
+		if (force || this.tokens_ && this.token_.resolved) {
+			this.token_ = null;
+			this.tokens_ = null;
+		}
+		return this.getToken();
+	}
+
+	async refreshToken_(refreshToken) {
+		return new Promise(resolve =>
+			https.request(this.credentials_.token_uri, {method: 'POST'}, res =>
+				res.on('data', data => resolve(JSON.parse(data.toString()).access_token))
+			).end(JSON.stringify({
+				refresh_token: refreshToken,
+				client_id: this.credentials_.client_id,
+				client_secret: this.credentials_.client_secret,
+				grant_type: 'refresh_token',
+			})));
+	}
+
+	async cleanToken_() {
 		let code = await this.requestCode_();
 		this.tokens_ = await this.requestToken_(code);
 		fs.writeFile(this.tokensPath_, JSON.stringify(this.tokens_, null, 2),
@@ -68,12 +100,7 @@ class GoogleAuth {
 				if (err)
 					throw err;
 			});
-		return this.token_ = this.tokens_.access_token;
-	}
-
-	getRefreshedToken() {
-		this.token_ = null;
-		return this.getToken();
+		return this.tokens_.access_token;
 	}
 
 	async requestCode_() {
@@ -91,18 +118,6 @@ class GoogleAuth {
 				client_secret: this.credentials_.client_secret,
 				redirect_uri: this.redirectUri_,
 				grant_type: 'authorization_code',
-			})));
-	}
-
-	async refreshToken_(refreshToken) {
-		return new Promise(resolve =>
-			https.request(this.credentials_.token_uri, {method: 'POST'}, res =>
-				res.on('data', data => resolve(JSON.parse(data.toString())))
-			).end(JSON.stringify({
-				refresh_token: refreshToken,
-				client_id: this.credentials_.client_id,
-				client_secret: this.credentials_.client_secret,
-				grant_type: 'refresh_token',
 			})));
 	}
 }

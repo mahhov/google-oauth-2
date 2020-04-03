@@ -57,8 +57,15 @@ class NodeGoogleAuth extends GoogleAuth {
 #### `new GoogleAuth(string credentialsPath, string tokensPath, string scope)`
 
 #### `Promise<string token> getToken()`
+1. Return the access token if there is one.
+1. Otherwise, refresh the access token using the refresh token if there is one.
+1. Otherwise, retrieve a refresh token through a consent screen.
 
-#### `Promise<string token> getRefreshedToken()`
+#### `Promise<string token> getRefreshedToken(bool force = false)`
+Same as `getToken` but will skip directly to step 2. If `force` is `false` (default), then multiple calls to `getRefreshedToken` while a refresh is in progress are safe; i.e. they will not refresh the token multiple times.
+
+#### `Promise<string token> getCleanToken(bool force = false)`
+Same as `getToken` but will skip directly to step 3. If `force` is `false` (default), then multiple calls to `getCleanToken` while a clean is in progress are safe; i.e. they will not open multiple consent screens or fetch multiple refresh tokens. This can be used to switch authentication accounts.
 
 ### Example Usage
 
@@ -70,8 +77,13 @@ let youtubeAuth = new GoogleAuth(
 
 let main = async () => { 
     console.log(await youtubeAuth.getToken()); // xyz
+    console.log(await youtubeAuth.getToken()); // xyz
+    console.log(await youtubeAuth.getRefreshedToken()); // uvw
     console.log(await youtubeAuth.getRefreshedToken()); // uvw
     console.log(await youtubeAuth.getToken()); // uvw
+    console.log(await youtubeAuth.getRefreshedToken()); // rst
+    console.log(await youtubeAuth.getRefreshedToken(true)); // opq
+    console.log(await youtubeAuth.getToken()); // opq
 };
 main();
 ```
