@@ -67,13 +67,13 @@ class GoogleAuth {
 	}
 
 	getRefreshedToken(force = false) {
-		if (force || this.token_.resolved)
+		if (force || this.token_?.resolved)
 			this.token_ = null;
 		return this.getToken();
 	}
 
 	getCleanToken(force = false) {
-		if (force || this.tokens_ && this.token_.resolved) {
+		if (force || this.token_?.resolved) {
 			this.token_ = null;
 			this.tokens_ = null;
 		}
